@@ -48,6 +48,21 @@
                  (.add ambient-light)
                  (.add point-light)))
 
+(defonce donutcat1
+  (let [dc (donutcat/make-donut)]
+    (.add scene dc)
+    dc))
+
+(defn render []
+  (.requestAnimationFrame js/window render)
+
+  (set! (.. donutcat1 -rotation -x) (+ (.. donutcat1 -rotation -x) 0.02))
+  (set! (.. donutcat1 -rotation -y) (+ (.. donutcat1 -rotation -y) 0.01))
+
+  (.render renderer scene camera))
+
+(defonce start (render))
+
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
