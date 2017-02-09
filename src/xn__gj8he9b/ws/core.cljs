@@ -6,18 +6,18 @@
 
 (enable-console-print!)
 
-(def initial-state {:width           (.-innerWidth js/window)
-                    :height          (.-innerHeight js/window)
-                    :resize-listener nil})
+(def donutcat-chance 0.2)
+(def velocity-max    10)
 
-(defonce state (atom initial-state))
+(defonce state (atom {:width           (.-innerWidth js/window)
+                      :height          (.-innerHeight js/window)
+                      :resize-listener nil
+                      :donutcats       ()}))
 
 (defonce camera (js/THREE.PerspectiveCamera.))
 (set! (.. camera -fov)         75)
 (set! (.. camera -near)        0.1)
-(set! (.. camera -far)         1000)
-(set! (.. camera -position -z) 5)
-(set! (.. camera -position -y) 1)
+(set! (.. camera -far)         50)
 
 (defonce renderer (doto (js/THREE.WebGLRenderer.)
                     (#(.appendChild (.-body js/document) (.-domElement %)))))
@@ -48,16 +48,54 @@
                  (.add ambient-light)
                  (.add point-light)))
 
-(defonce donutcat1
-  (let [dc (donutcat/make-donut)]
+; Assumes the camera is pointed in the negative z direction
+(defn get-z-extents []
+  (let [camera-z (.. camera -position -z)]
+    [(- camera-z (.-near camera))
+     (- camera-z (.-far camera))]))
+
+; Assumes the camera is pointed in the negative z direction
+(defn get-xy-extents [z]
+  (let [camera-x      (.. camera -position -x)
+        camera-y      (.. camera -position -y)
+        camera-z      (.. camera -position -z)
+        distance      (- camera-z z)
+        height        (* 2 (js/Math.tan (/ (.-fov camera) 2)) distance)
+        width         (* (.-aspect camera) height)]
+    [(- camera-x width)
+     (+ camera-x width)
+     (- camera-y height)
+     (+ camera-y height)]))
+
+(defn in-frustum? [vector3]
+  (let [x (.-x vector3)
+        y (.-y vector3)
+        z (.-z vector3)
+        [min-x max-x min-y max-y] (get-xy-extents z)
+        [min-z max-z] (get-z-extents)]
+    (and (<= min-x x max-x)
+         (<= min-y y max-y)
+         (<= min-z z max-z))))
+
+(defn rand-range [mn mx] (+ (rand (- mx mn)) mn))
+
+(defn add-donutcat []
+  (let [dc (donutcat/make-donutcat)
+        [min-z max-z] (get-z-extents)
+        z (rand-range min-z max-z)
+        [min-x max-x min-y max-y min-z max-z] (get-xy-extents z)
+        from-left (< (rand) 0.5)
+        x (if from-left min-x max-x)
+        y (rand-range min-y max-y)
+        v (rand velocity-max)
+        v (if from-left v (- v))]
+    (.set (.-position dc) x y z)
+    (set! (.. dc -rotation -x) (/ js/Math.PI 2.0))
     (.add scene dc)
     dc))
 
 (defn render []
   (.requestAnimationFrame js/window render)
-
-  (set! (.. donutcat1 -rotation -x) (+ (.. donutcat1 -rotation -x) 0.02))
-  (set! (.. donutcat1 -rotation -y) (+ (.. donutcat1 -rotation -y) 0.01))
 
   (.render renderer scene camera))
 

@@ -43,7 +43,7 @@
   (set! (.-name object3d) n)
   object3d)
 
-(defn make-donut []
+(defn make-donutcat []
   (let [donut-geometry (@state :donut-geometry)
         donut-material (@state :donut-material)
         icing-geometry (@state :icing-geometry)
