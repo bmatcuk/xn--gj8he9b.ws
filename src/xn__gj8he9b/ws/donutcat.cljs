@@ -7,7 +7,8 @@
                       :decal-geometry nil
                       :decal-material nil
                       :cat-texture    nil
-                      :donuts         ()}))
+                      :donut-radius   nil
+                      :donuts         #{}}))
 
 (defonce json-loader (js/THREE.JSONLoader.))
 (defonce texture-loader (js/THREE.TextureLoader.))
@@ -65,6 +66,11 @@
       (.add (set-name decal "decal"))
       (->> (swap! state update-in [:donuts] conj)))))
 
+(defn remove-donutcat [dc]
+  (swap! state update-in [:donuts] disj dc))
+
+(defn get-donutcat-radius [] (@state :donut-radius))
+
 (defn update-donuts [donuts mesh-name property value]
   (let [meshes (map #(.getObjectByName % mesh-name) donuts)]
     (doseq [donut meshes] (aset donut property value))))
@@ -97,13 +103,17 @@
                      box (.setFromObject (js/THREE.Box3.) mesh)
                      position (.getCenter box)
                      rotation (js/THREE.Vector3. (/ js/Math.PI 2) 0 0)
+                     dimensions-x (- (.. box -max -x) (.. box -min -x))
+                     dimensions-y (- (.. box -max -z) (.. box -min -z))
+                     dimensions-z (- (.. box -max -y) (.. box -min -y))
                      dimensions (js/THREE.Vector3.
-                                  (- (.. box -max -x) (.. box -min -x))
-                                  (- (.. box -max -z) (.. box -min -z))
-                                  (- (.. box -max -y) (.. box -min -y)))
+                                  dimensions-x
+                                  dimensions-y
+                                  dimensions-z)
                      check (js/THREE.Vector3. 1 1 1)
-                     decal-geometry (js/THREE.DecalGeometry. mesh position rotation dimensions check)]
-                 (swap! state assoc :decal-geometry decal-geometry)))
+                     decal-geometry (js/THREE.DecalGeometry. mesh position rotation dimensions check)
+                     radius (/ (max dimensions-x dimensions-y) 2)]
+                 (swap! state assoc :decal-geometry decal-geometry :donut-radius radius)))
              (when (not= (old-state :icing-material)  (new-state :icing-material))
                (update-donuts (new-state :donuts) "icing" "material"  (new-state :icing-material))
                (build-decal-material (new-state :icing-material)  (new-state :cat-texture)))
