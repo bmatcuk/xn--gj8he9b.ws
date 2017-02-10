@@ -1,7 +1,8 @@
 (ns xn--gj8he9b.ws.core
   (:require [goog.events :as events]
             [goog.events.EventType]
-            [xn--gj8he9b.ws.donutcat :as donutcat])
+            [xn--gj8he9b.ws.donutcat :as donutcat]
+            [xn--gj8he9b.ws.background :as background])
   (:import [goog.events EventType]))
 
 (enable-console-print!)
@@ -21,13 +22,14 @@
 (set! (.. camera -near)        0.1)
 (set! (.. camera -far)         25)
 
-(defonce renderer (doto (js/THREE.WebGLRenderer.)
+(defonce renderer (doto (js/THREE.WebGLRenderer. #js { :alpha true })
                     (#(.appendChild (.-body js/document) (.-domElement %)))))
 
 (defn resize! [& _]
   (let [width (.-innerWidth js/window)
         height (.-innerHeight js/window)
         aspect (/ width height)]
+    (background/update-background width height)
     (set! (.-aspect camera) aspect)
     (.updateProjectionMatrix camera)
     (.setSize renderer width height)
