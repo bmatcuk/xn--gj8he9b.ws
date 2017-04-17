@@ -13,3 +13,4 @@ pom.xml
 .nrepl-port
 *.blend1
 *.swp
+.DS_Store

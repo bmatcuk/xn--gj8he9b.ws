@@ -1,4 +1,6 @@
-(ns xn--gj8he9b.ws.donutcat)
+(ns xn--gj8he9b.ws.donutcat
+  (:require cljsjs.three
+            cljsjs.three-decalgeometry))
 
 (defonce state (atom {:donut-geometry nil
                       :donut-material nil

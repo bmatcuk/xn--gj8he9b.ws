@@ -2,7 +2,8 @@
   (:require [goog.events :as events]
             [goog.events.EventType]
             [xn--gj8he9b.ws.donutcat :as donutcat]
-            [xn--gj8he9b.ws.background :as background])
+            [xn--gj8he9b.ws.background :as background]
+            cljsjs.three)
   (:import [goog.events EventType]))
 
 (enable-console-print!)

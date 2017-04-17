@@ -1,0 +1,3 @@
+[submodule "resources/public"]
+	path = resources/public
+	url = git@github.com:bmatcuk/xn--gj8he9b.ws.git
