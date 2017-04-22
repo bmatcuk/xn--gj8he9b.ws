@@ -49,7 +49,8 @@
                 :source-paths ["src"]
                 :compiler {:output-to "resources/public/js/compiled/xn__gj8he9b/ws.js"
                            :main xn--gj8he9b.ws.core
-                           :optimizations :simple   ;; :advanced
+                           :externs ["resources/externs/three.ext.js"]
+                           :optimizations :advanced
                            :pseudo-names true
                            :pretty-print false}}]}
 
